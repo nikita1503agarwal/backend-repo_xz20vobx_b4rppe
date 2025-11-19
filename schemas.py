@@ -11,11 +11,11 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
+from datetime import date
 
-# Example schemas (replace with your own):
-
+# Example schemas (keep for reference)
 class User(BaseModel):
     """
     Users collection schema
@@ -38,11 +38,37 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# ---------------- League App Schemas ----------------
+class League(BaseModel):
+    """League configuration and season info
+    Collection name: "league"
+    """
+    name: str = Field(..., description="League name")
+    city: Optional[str] = Field(None, description="City or region")
+    season_start: Optional[date] = Field(None, description="Season start date")
+    season_end: Optional[date] = Field(None, description="Season end date")
+    divisions: List[str] = Field(default_factory=lambda: ["Recreational", "Intermediate", "Advanced"])
+    team_size: int = Field(6, ge=1, le=12, description="Players per team")
+    is_open: bool = Field(True, description="Whether registration is open")
+    description: Optional[str] = Field(None, description="About the league")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Registration(BaseModel):
+    """Player or team registration
+    Collection name: "registration"
+    """
+    full_name: str = Field(..., description="Registrant full name")
+    email: EmailStr = Field(..., description="Contact email")
+    phone: Optional[str] = Field(None, description="Phone number")
+    pronouns: Optional[str] = Field(None, description="Pronouns")
+    division: Optional[str] = Field(None, description="Requested division/skill level")
+    team_name: Optional[str] = Field(None, description="Team name if registering a team")
+    free_agent: bool = Field(False, description="Registering as a free agent")
+    notes: Optional[str] = Field(None, description="Additional info or requests")
+
+class Announcement(BaseModel):
+    """League announcements/news
+    Collection name: "announcement"
+    """
+    title: str
+    message: str
+    published: bool = True
